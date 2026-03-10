@@ -114,3 +114,47 @@
         table.innerHTML = row; // अभी के लिए केवल एक दिखा रहा है
     }
 </script>
+<div id="liveLeaderboard" style="margin-top:40px; border-top:2px solid #1e3799; padding-top:20px;">
+    <h2 style="text-align:center; color:#1e3799;">🏆 Top 10 Rankers (Live)</h2>
+    <table id="rankTable" style="width:100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+        <thead style="background:#1e3799; color:white;">
+            <tr>
+                <th style="padding:12px;">Rank</th>
+                <th>नाम</th>
+                <th>गलतियाँ</th>
+                <th>Accuracy</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboardBody" style="text-align:center;">
+            </tbody>
+    </table>
+</div>
+async function fetchRankings() {
+    // अपनी Google Sheet की ID यहाँ डालें
+    const sheetID = 'आपकी_SHEET_ID_यहाँ'; 
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        let html = "";
+        // केवल टॉप 10 छात्रों को दिखाना
+        rows.slice(0, 10).forEach((row, index) => {
+            html += `<tr style="border-bottom:1px solid #eee;">
+                <td style="padding:10px; font-weight:bold;">${index + 1}</td>
+                <td>${row.c[0].v}</td>
+                <td>${row.c[1].v}</td>
+                <td>${row.c[2].v}%</td>
+            </tr>`;
+        });
+        document.getElementById('leaderboardBody').innerHTML = html;
+    } catch (e) {
+        console.error("रैंकिंग लोड करने में त्रुटि:", e);
+    }
+}
+
+// पेज लोड होते ही रैंकिंग दिखाएँ
+window.onload = fetchRankings;
