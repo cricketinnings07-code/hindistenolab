@@ -82,3 +82,35 @@
         आपका ब्राउज़र ऑडियो सपोर्ट नहीं करता।
     </audio>
 </div>
+<div id="leaderboard" style="display:none; margin-top:30px; border-top:2px solid #ddd; padding-top:20px;">
+    <h3 style="text-align:center; color:#1e3799;">🏆 Live Test Ranking (Top 10)</h3>
+    <table style="width:100%; border-collapse: collapse; margin-top:10px; background:#fff;">
+        <thead style="background:#1e3799; color:#fff;">
+            <tr>
+                <th style="padding:10px;">Rank</th>
+                <th>नाम</th>
+                <th>गलतियाँ</th>
+                <th>Accuracy</th>
+            </tr>
+        </thead>
+        <tbody id="rankBody" style="text-align:center;">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // यह फंक्शन रैंकिंग को सजाएगा और दिखाएगा
+    function updateLeaderboard(name, errors, acc) {
+        document.getElementById('leaderboard').style.display = 'block';
+        let table = document.getElementById('rankBody');
+        
+        // नया छात्र जोड़ें
+        let row = `<tr>
+            <td style="padding:10px;">1</td>
+            <td>${name}</td>
+            <td>${errors}</td>
+            <td>${acc}%</td>
+        </tr>`;
+        table.innerHTML = row; // अभी के लिए केवल एक दिखा रहा है
+    }
+</script>
