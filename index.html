@@ -2,53 +2,72 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>HindiStenoLab - Direct Test</title>
+    <title>HindiStenoLab - Live Mega Test</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 700px; text-align: center; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; text-align: center; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 750px; margin: auto; }
         @font-face { font-family: 'KrutiDev'; src: local('Kruti Dev 010'); }
-        textarea { width: 100%; height: 300px; font-family: 'Kruti Dev 010'; font-size: 24px; padding: 15px; margin-top: 15px; border: 2px solid #ccc; border-radius: 10px; }
-        .timer { font-size: 30px; color: red; font-weight: bold; margin-bottom: 10px; }
+        textarea { width: 100%; height: 250px; font-family: 'Kruti Dev 010'; font-size: 24px; padding: 15px; margin-top: 15px; border: 2px solid #ccc; border-radius: 10px; }
         .btn { width: 100%; padding: 15px; background: #1e3799; color: white; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #1e3799; color: white; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1 style="color:#1e3799;">HindiStenoLab Live Test</h1>
-    <div class="timer" id="clock">10:00</div>
-    <p>नीचे दिए गए बॉक्स में टाइप करना शुरू करें:</p>
-    <textarea id="typingBox" onkeydown="handleKey(event)" placeholder="यहाँ टाइप करें..."></textarea>
-    <button class="btn" onclick="showResult()">टेस्ट सबमिट करें</button>
+    <h1 style="color:#1e3799;">HindiStenoLab Live Arena</h1>
     
-    <div id="res" style="display:none; margin-top:20px; text-align:left; border-top:2px solid #eee; padding-top:20px;">
-        <h2 id="score"></h2>
-        <div id="diff" style="font-family:'Kruti Dev 010'; font-size:22px; line-height:2;"></div>
+    <audio id="stenoAudio" controls style="width:100%; margin: 15px 0;">
+        <source src="dictation1.mp3" type="audio/mpeg">
+    </audio>
+
+    <div style="font-size: 30px; color: red; font-weight: bold;" id="clock">10:00</div>
+    <textarea id="typingBox" onkeydown="handleKey(event)" placeholder="यहाँ टाइप करें..."></textarea>
+    <button class="btn" onclick="submitTest()">टेस्ट सबमिट करें</button>
+    
+    <div id="resArea" style="display:none; margin-top:20px;">
+        <h2 id="finalScore"></h2>
+        <div id="diff" style="font-family:'Kruti Dev 010'; font-size:22px; line-height:2; text-align:left; background:#f9f9f9; padding:15px;"></div>
+    </div>
+
+    <div id="ranking" style="margin-top:40px;">
+        <h3>🏆 Live Ranking (Top 10)</h3>
+        <table>
+            <thead>
+                <tr><th>Rank</th><th>नाम</th><th>गलतियाँ</th><th>Accuracy</th></tr>
+            </thead>
+            <tbody id="rankBody"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    const masterText = "Hkkjr ,d egku ns'k gSA"; // आपका कृतिदेव मैटर
-    let timeLeft = 600;
+    // --- यहाँ अपनी डिटेल्स डालें ---
+    const sheetID = '1BxiMVs0XRA5nSMb_K697wvg'; // अपनी असली Google Sheet ID डालें
+    const scriptURL = 'यहाँ_अपना_WEB_APP_URL_डालें'; // Apps Script से मिला URL
+    const masterText = "Hkkjr ,d egku ns'k gSA"; 
+    // ----------------------------
 
-    // टाइमर शुरू करना
+    let timeLeft = 600;
     setInterval(() => {
         if(timeLeft > 0) {
             timeLeft--;
             let m = Math.floor(timeLeft / 60);
             let s = timeLeft % 60;
             document.getElementById('clock').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        } else {
-            showResult();
         }
     }, 1000);
 
     function handleKey(e) {
-        // स्मार्ट बैकस्पेस: स्पेस के बाद लॉक
         if (e.keyCode === 8 && e.target.value.endsWith(" ")) { e.preventDefault(); }
     }
 
-    function showResult() {
+    async function submitTest() {
+        let name = prompt("रैंकिंग के लिए अपना नाम लिखें:");
+        if (!name) return alert("नाम ज़रूरी है!");
+
         const typed = document.getElementById('typingBox').value.trim();
         const mArr = masterText.split(/\s+/);
         const tArr = typed.split(/\s+/);
@@ -57,104 +76,42 @@
 
         mArr.forEach((w, i) => {
             let tw = tArr[i] || "____";
-            if (tw === w) { 
-                correct++; 
-                html += `<span style="color:green">${w} </span>`; 
-            } else { 
-                html += `<span style="color:red; text-decoration:line-through;">${tw}</span> <span style="color:blue">(${w})</span> `; 
-            }
+            if (tw === w) { correct++; html += `<span style="color:green">${w} </span>`; }
+            else { html += `<span style="color:red; text-decoration:line-through;">${tw}</span> <span style="color:blue">(${w})</span> `; }
         });
 
-        document.getElementById('score').innerText = `सही शब्द: ${correct} / ${mArr.length}`;
-        document.getElementById('diff').innerHTML = html;
-        document.getElementById('res').style.display = 'block';
-        document.getElementById('typingBox').disabled = true;
-    }
-</script>
+        let acc = ((correct/mArr.length)*100).toFixed(2);
+        let mistakes = mArr.length - correct;
 
+        document.getElementById('finalScore').innerText = `सही: ${correct} | गलतियाँ: ${mistakes} | Accuracy: ${acc}%`;
+        document.getElementById('diff').innerHTML = html;
+        document.getElementById('resArea').style.display = 'block';
+
+        // गूगल शीट में डेटा भेजना
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ name: name, errors: mistakes, accuracy: acc })
+        }).then(() => {
+            alert("रिजल्ट सेव हो गया!");
+            fetchRankings();
+        });
+    }
+
+    async function fetchRankings() {
+        const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+        try {
+            const res = await fetch(url);
+            const text = await res.text();
+            const json = JSON.parse(text.substr(47).slice(0, -2));
+            let html = "";
+            json.table.rows.slice(0, 10).forEach((row, i) => {
+                html += `<tr><td>${i+1}</td><td>${row.c[0].v}</td><td>${row.c[1].v}</td><td>${row.c[2].v}%</td></tr>`;
+            });
+            document.getElementById('rankBody').innerHTML = html;
+        } catch(e) {}
+    }
+    fetchRankings();
+</script>
 </body>
 </html>
-
-<div style="background:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #ddd;">
-    <b>डिक्टेशन सुनें:</b><br>
-    <audio id="stenoAudio" controls style="width:100%; margin-top:10px;">
-        <source src="dictation1.mp3" type="audio/mpeg">
-        आपका ब्राउज़र ऑडियो सपोर्ट नहीं करता।
-    </audio>
-</div>
-<div id="leaderboard" style="display:none; margin-top:30px; border-top:2px solid #ddd; padding-top:20px;">
-    <h3 style="text-align:center; color:#1e3799;">🏆 Live Test Ranking (Top 10)</h3>
-    <table style="width:100%; border-collapse: collapse; margin-top:10px; background:#fff;">
-        <thead style="background:#1e3799; color:#fff;">
-            <tr>
-                <th style="padding:10px;">Rank</th>
-                <th>नाम</th>
-                <th>गलतियाँ</th>
-                <th>Accuracy</th>
-            </tr>
-        </thead>
-        <tbody id="rankBody" style="text-align:center;">
-            </tbody>
-    </table>
-</div>
-
-<script>
-    // यह फंक्शन रैंकिंग को सजाएगा और दिखाएगा
-    function updateLeaderboard(name, errors, acc) {
-        document.getElementById('leaderboard').style.display = 'block';
-        let table = document.getElementById('rankBody');
-        
-        // नया छात्र जोड़ें
-        let row = `<tr>
-            <td style="padding:10px;">1</td>
-            <td>${name}</td>
-            <td>${errors}</td>
-            <td>${acc}%</td>
-        </tr>`;
-        table.innerHTML = row; // अभी के लिए केवल एक दिखा रहा है
-    }
-</script>
-<div id="liveLeaderboard" style="margin-top:40px; border-top:2px solid #1e3799; padding-top:20px;">
-    <h2 style="text-align:center; color:#1e3799;">🏆 Top 10 Rankers (Live)</h2>
-    <table id="rankTable" style="width:100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
-        <thead style="background:#1e3799; color:white;">
-            <tr>
-                <th style="padding:12px;">Rank</th>
-                <th>नाम</th>
-                <th>गलतियाँ</th>
-                <th>Accuracy</th>
-            </tr>
-        </thead>
-        <tbody id="leaderboardBody" style="text-align:center;">
-            </tbody>
-    </table>
-</div>
-async function fetchRankings() {
-    // अपनी Google Sheet की ID यहाँ डालें
-    const sheetID = 'आपकी_SHEET_ID_यहाँ'; 
-    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
-
-    try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
-
-        let html = "";
-        // केवल टॉप 10 छात्रों को दिखाना
-        rows.slice(0, 10).forEach((row, index) => {
-            html += `<tr style="border-bottom:1px solid #eee;">
-                <td style="padding:10px; font-weight:bold;">${index + 1}</td>
-                <td>${row.c[0].v}</td>
-                <td>${row.c[1].v}</td>
-                <td>${row.c[2].v}%</td>
-            </tr>`;
-        });
-        document.getElementById('leaderboardBody').innerHTML = html;
-    } catch (e) {
-        console.error("रैंकिंग लोड करने में त्रुटि:", e);
-    }
-}
-
-// पेज लोड होते ही रैंकिंग दिखाएँ
-window.onload = fetchRankings;
