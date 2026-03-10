@@ -1,5 +1,5 @@
 function sendDataToSheet(name, mistakes, acc) {
-    const scriptURL = 'आपका_WEB_APP_URL_यहाँ_पेस्ट_करें'; // यहाँ अपना गूगल स्क्रिप्ट लिंक डालें
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxQRj2ivFy6eiuwHpumMQDbKxv5MYjB30aNXf73QHdPranuIGHmmZtZE8Jo2XazVLtq/exec'; // यहाँ अपना गूगल स्क्रिप्ट लिंक डालें
     
     fetch(scriptURL, {
         method: 'POST',
